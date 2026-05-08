@@ -1,0 +1,44 @@
+{
+  "name": "devplan-tracker-pack",
+  "version": "1.0.0",
+  "description": "Dependency-free DEVPLAN tracker CLI and repository pack for software projects.",
+  "type": "module",
+  "bin": {
+    "devplan": "./scripts/devplan.mjs"
+  },
+  "files": [
+    "DEVPLAN.md",
+    "DEVPLAN-STATE.json",
+    "manifest.json",
+    "package-scripts.json",
+    "schemas/",
+    "scripts/",
+    "install.mjs",
+    "docs/",
+    "workflows/",
+    "examples/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "devplan": "node scripts/devplan.mjs",
+    "devplan:status": "node scripts/devplan-status.mjs",
+    "devplan:validate": "node scripts/devplan-validate.mjs",
+    "devplan:next": "node scripts/devplan.mjs next",
+    "devplan:report": "node scripts/devplan-report.mjs",
+    "devplan:readiness": "node scripts/devplan.mjs readiness"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "devplan",
+    "tracker",
+    "project-management",
+    "agent-workflows"
+  ],
+  "license": "MIT"
+}
