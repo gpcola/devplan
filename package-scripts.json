@@ -1,10 +1,10 @@
 {
   "scripts": {
     "devplan": "node scripts/devplan.mjs",
-    "devplan:status": "node scripts/devplan-status.mjs",
-    "devplan:validate": "node scripts/devplan-validate.mjs",
-    "devplan:next": "node scripts/devplan.mjs next",
-    "devplan:report": "node scripts/devplan-report.mjs",
-    "devplan:readiness": "node scripts/devplan.mjs readiness"
+    "devplan:status": "node scripts/devplan.mjs status --state devplan/DEVPLAN-STATE.json --plan devplan/DEVPLAN.md",
+    "devplan:validate": "node scripts/devplan.mjs validate --state devplan/DEVPLAN-STATE.json --plan devplan/DEVPLAN.md",
+    "devplan:next": "node scripts/devplan.mjs next --state devplan/DEVPLAN-STATE.json",
+    "devplan:report": "node scripts/devplan.mjs report --state devplan/DEVPLAN-STATE.json --plan devplan/DEVPLAN.md --output devplan/reports/DEVPLAN-REPORT.md",
+    "devplan:readiness": "node scripts/devplan.mjs readiness --state devplan/DEVPLAN-STATE.json"
   }
 }

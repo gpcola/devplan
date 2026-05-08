@@ -1,0 +1,19 @@
+name: DEVPLAN Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  devplan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/devplan.mjs validate
+      - run: node scripts/devplan.mjs status
+      - run: node scripts/devplan.mjs readiness

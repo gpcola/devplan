@@ -1,20 +1,18 @@
 {
   "name": "devplan-tracker-pack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dependency-free DEVPLAN tracker CLI and repository pack for software projects.",
   "type": "module",
   "bin": {
+    "devplan-tracker": "./scripts/devplan.mjs",
     "devplan": "./scripts/devplan.mjs"
   },
   "files": [
-    "DEVPLAN.md",
-    "DEVPLAN-STATE.json",
+    "devplan/",
     "manifest.json",
     "package-scripts.json",
-    "schemas/",
     "scripts/",
     "install.mjs",
-    "docs/",
     "workflows/",
     "examples/",
     "LICENSE",
@@ -32,7 +30,7 @@
     "devplan:readiness": "node scripts/devplan.mjs readiness"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.0.0"
   },
   "keywords": [
     "devplan",
