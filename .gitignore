@@ -1,0 +1,13 @@
+node_modules/
+npm-debug.log*
+.DS_Store
+coverage/
+
+# DEVPLAN tracker generated/local files
+devplan/reports/
+.devplan/
+.devplan-cache/
+*.devplan.backup.json
+!devplan/reports/
+devplan/reports/*
+!devplan/reports/.gitkeep

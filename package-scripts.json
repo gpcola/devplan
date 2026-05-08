@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "devplan": "node scripts/devplan.mjs",
+    "devplan:status": "node scripts/devplan-status.mjs",
+    "devplan:validate": "node scripts/devplan-validate.mjs",
+    "devplan:next": "node scripts/devplan.mjs next",
+    "devplan:report": "node scripts/devplan-report.mjs",
+    "devplan:readiness": "node scripts/devplan.mjs readiness",
+    "devplan:migrate": "node scripts/devplan.mjs migrate"
+  }
+}

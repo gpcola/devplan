@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Client Website Redesign",
+    "repo": "agency/client-site",
+    "canonical_branch": "main",
+    "updated_at": "2026-05-08T00:00:00.000Z"
+  },
+  "rules": {
+    "update_state_when_work_done": true,
+    "valid_statuses": ["planned", "in_progress", "done", "blocked", "deferred", "superseded"],
+    "release_critical_priorities": ["release-critical-now"],
+    "protected_surfaces": ["contact form delivery", "SEO redirects"]
+  },
+  "milestones": [
+    { "id": "site-launch", "title": "Website launch", "status": "blocked", "items": ["site.redirects", "site.client-copy"] }
+  ],
+  "items": [
+    {
+      "id": "site.redirects",
+      "title": "Map legacy URLs to redesigned pages",
+      "status": "planned",
+      "priority": "release-critical-now",
+      "owner": "seo",
+      "evidence": [],
+      "success_conditions": ["All high-traffic legacy URLs have tested redirects."],
+      "notes": [],
+      "updated_at": "2026-05-08T00:00:00.000Z"
+    },
+    {
+      "id": "site.client-copy",
+      "title": "Receive final approved homepage copy",
+      "status": "blocked",
+      "priority": "release-critical-now",
+      "owner": "client",
+      "evidence": [],
+      "success_conditions": ["Approved copy is available for all homepage sections."],
+      "notes": [{ "at": "2026-05-08T00:00:00.000Z", "text": "Waiting for client approval." }],
+      "updated_at": "2026-05-08T00:00:00.000Z"
+    }
+  ]
+}
