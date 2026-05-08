@@ -6,6 +6,7 @@
   "node": ">=18.0.0",
   "entrypoint": "scripts/devplan.mjs",
   "default_layout": {
+    "roadmap": "devplan/ROADMAP.md",
     "state": "devplan/DEVPLAN-STATE.json",
     "plan": "devplan/DEVPLAN.md",
     "config": "devplan/devplan.config.json",
@@ -32,6 +33,7 @@
     "README.md",
     "LICENSE",
     "package.json",
+    "devplan/ROADMAP.md",
     "devplan/DEVPLAN.md",
     "devplan/DEVPLAN-STATE.json",
     "devplan/devplan.config.json",
