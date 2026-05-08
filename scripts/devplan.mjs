@@ -539,6 +539,7 @@ async function installIntoTarget(args) {
   const rootFiles = Boolean(args["root-files"]);
   const localOnly = Boolean(args["local-only"]);
   const mapping = rootFiles ? [
+    ["devplan/ROADMAP.md", "docs/DEVPLAN-ROADMAP.md"],
     ["devplan/DEVPLAN.md", "DEVPLAN.md"],
     ["devplan/DEVPLAN-STATE.json", "DEVPLAN-STATE.json"],
     ["devplan/schemas/devplan-state.schema.json", "schemas/devplan-state.schema.json"],
@@ -548,6 +549,7 @@ async function installIntoTarget(args) {
     ["devplan/docs/CI.md", "docs/DEVPLAN-CI.md"],
     ["devplan/docs/MIGRATION.md", "docs/DEVPLAN-MIGRATION.md"],
   ] : [
+    ["devplan/ROADMAP.md", "devplan/ROADMAP.md"],
     ["devplan/DEVPLAN.md", "devplan/DEVPLAN.md"],
     ["devplan/DEVPLAN-STATE.json", "devplan/DEVPLAN-STATE.json"],
     ["devplan/devplan.config.json", "devplan/devplan.config.json"],
