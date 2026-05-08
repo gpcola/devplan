@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/devplan-state.schema.json",
+  "title": "DEVPLAN State",
+  "type": "object",
+  "required": ["schema_version", "project", "rules", "milestones", "items"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "project": {
+      "type": "object",
+      "required": ["name", "repo", "canonical_branch", "updated_at"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "repo": { "type": "string", "minLength": 1 },
+        "canonical_branch": { "type": "string", "minLength": 1 },
+        "updated_at": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "rules": {
+      "type": "object",
+      "required": ["valid_statuses"],
+      "properties": {
+        "update_state_when_work_done": { "type": "boolean" },
+        "valid_statuses": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "release_critical_priorities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "protected_surfaces": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status", "items"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "minLength": 1 },
+          "items": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status", "priority", "success_conditions", "updated_at"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "minLength": 1 },
+          "priority": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "success_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+          "notes": { "type": "array" },
+          "updated_at": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
