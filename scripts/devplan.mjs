@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -10,12 +10,8 @@ const SUPPORTED_SCHEMA_VERSION = 1;
 const DEFAULT_STATUSES = ["planned", "in_progress", "done", "blocked", "deferred", "superseded"];
 const DEFAULT_PRIORITIES = ["release-critical-now", "must-add-soon-after-release", "later-polish", "maintenance"];
 const DEFAULT_RELEASE_CRITICAL = ["release-critical-now"];
-const DEFAULT_STATE_PATH = "devplan/DEVPLAN-STATE.json";
-const DEFAULT_PLAN_PATH = "devplan/DEVPLAN.md";
-const DEFAULT_CONFIG_PATH = "devplan/devplan.config.json";
-const LEGACY_STATE_PATH = "DEVPLAN-STATE.json";
-const LEGACY_PLAN_PATH = "DEVPLAN.md";
-const LEGACY_WARNING = "Using legacy root DEVPLAN files. Run devplan-tracker migrate to move them to /devplan.";
+const DEFAULT_STATE_PATH = "DEVPLAN-STATE.json";
+const DEFAULT_PLAN_PATH = "DEVPLAN.md";
 const TERMINAL_STATUSES = new Set(["done", "deferred", "superseded"]);
 const OPEN_STATUSES = new Set(["planned", "in_progress", "blocked"]);
 const CLI_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -29,9 +25,9 @@ Usage:
 
 Commands:
   status
-  validate [--state devplan/DEVPLAN-STATE.json] [--plan devplan/DEVPLAN.md] [--config devplan/devplan.config.json]
+  validate [--state DEVPLAN-STATE.json] [--plan DEVPLAN.md]
   next [--limit 5]
-  report [--output devplan/reports/DEVPLAN-REPORT.md]
+  report [--output docs/DEVPLAN-REPORT.md]
   readiness
   list [--status planned] [--priority release-critical-now] [--milestone launch]
   add-milestone --id <id> --title <title> [--status planned]
@@ -41,12 +37,10 @@ Commands:
   link-item --id <id> --milestone <id>
   protect --surface <command-or-file>
   init --name <project> [--repo owner/repo] [--branch main] [--force]
-  migrate [--dry-run] [--keep-root-stub] [--force]
 
 Global options:
-  --state <file>   State file path (default devplan/DEVPLAN-STATE.json)
-  --plan <file>    Plan file path (default devplan/DEVPLAN.md)
-  --config <file>  Config file path (default devplan/devplan.config.json)
+  --state <file>   State file path (default DEVPLAN-STATE.json)
+  --plan <file>    Plan file path (default DEVPLAN.md)
   --help           Show this help
 `);
 }
@@ -74,29 +68,10 @@ function parseArgs(argv) {
   return out;
 }
 
-function usesDefaultDevplanPaths(args) {
-  return !args.state && !args.plan && !process.env.DEVPLAN_STATE_PATH && !process.env.DEVPLAN_PLAN_PATH;
-}
-
-function shouldUseLegacyRoot(args) {
-  return usesDefaultDevplanPaths(args) && !existsSync("devplan") && existsSync(LEGACY_STATE_PATH) && existsSync(LEGACY_PLAN_PATH);
-}
-
 function paths(args) {
-  if (shouldUseLegacyRoot(args)) {
-    console.error(LEGACY_WARNING);
-    return {
-      statePath: LEGACY_STATE_PATH,
-      planPath: LEGACY_PLAN_PATH,
-      configPath: args.config || process.env.DEVPLAN_CONFIG_PATH || DEFAULT_CONFIG_PATH,
-      legacy: true
-    };
-  }
   return {
     statePath: args.state || process.env.DEVPLAN_STATE_PATH || DEFAULT_STATE_PATH,
-    planPath: args.plan || process.env.DEVPLAN_PLAN_PATH || DEFAULT_PLAN_PATH,
-    configPath: args.config || process.env.DEVPLAN_CONFIG_PATH || DEFAULT_CONFIG_PATH,
-    legacy: false
+    planPath: args.plan || process.env.DEVPLAN_PLAN_PATH || DEFAULT_PLAN_PATH
   };
 }
 
@@ -509,91 +484,6 @@ async function protect(state, args) {
   console.log(`protected_surface=${args.surface}`);
 }
 
-
-async function writeConfig(configPath) {
-  await mkdir(path.dirname(configPath), { recursive: true });
-  const config = {
-    schema_version: SUPPORTED_SCHEMA_VERSION,
-    state: DEFAULT_STATE_PATH,
-    plan: DEFAULT_PLAN_PATH,
-    reports_dir: "devplan/reports",
-    schema: "devplan/schemas/devplan-state.schema.json"
-  };
-  await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
-}
-
-async function updatePackageScripts(root = process.cwd(), { dryRun = false } = {}) {
-  const packagePath = path.join(root, "package.json");
-  if (!existsSync(packagePath)) return ["package_json=missing"];
-  const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
-  const scripts = {
-    devplan: "node scripts/devplan.mjs",
-    "devplan:status": "node scripts/devplan-status.mjs",
-    "devplan:validate": "node scripts/devplan-validate.mjs",
-    "devplan:next": "node scripts/devplan.mjs next",
-    "devplan:report": "node scripts/devplan-report.mjs",
-    "devplan:readiness": "node scripts/devplan.mjs readiness",
-    "devplan:migrate": "node scripts/devplan.mjs migrate"
-  };
-  packageJson.scripts ??= {};
-  const changed = [];
-  for (const [name, command] of Object.entries(scripts)) {
-    if (packageJson.scripts[name] !== command) {
-      packageJson.scripts[name] = command;
-      changed.push(`script=${name}`);
-    }
-  }
-  if (changed.length && !dryRun) await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
-  return changed;
-}
-
-async function updateGitignore(root = process.cwd(), { localOnly = false, dryRun = false } = {}) {
-  const gitignorePath = path.join(root, ".gitignore");
-  const baseBlock = `# DEVPLAN tracker generated/local files\ndevplan/reports/\n.devplan/\n.devplan-cache/\n*.devplan.backup.json\n!devplan/reports/\ndevplan/reports/*\n!devplan/reports/.gitkeep`;
-  const localBlock = `# DEVPLAN tracker local-only files\ndevplan/\nDEVPLAN.md\nDEVPLAN-STATE.json\nschemas/devplan-state.schema.json`;
-  const required = localOnly ? `${baseBlock}\n${localBlock}` : baseBlock;
-  const current = existsSync(gitignorePath) ? await readFile(gitignorePath, "utf8") : "";
-  let next = current;
-  for (const line of required.split("\n")) {
-    if (!next.split(/\r?\n/).includes(line)) next += `${next.endsWith("\n") || next.length === 0 ? "" : "\n"}${line}\n`;
-  }
-  if (next !== current && !dryRun) await writeFile(gitignorePath, next);
-  return next !== current;
-}
-
-async function moveFile(source, destination, { dryRun = false, force = false } = {}) {
-  if (!existsSync(source)) return `missing=${source}`;
-  if (existsSync(destination) && !force) throw new Error(`${destination} exists; use --force to overwrite`);
-  if (!dryRun) {
-    await mkdir(path.dirname(destination), { recursive: true });
-    if (existsSync(destination) && force) await rm(destination, { force: true });
-    await rename(source, destination);
-  }
-  return `move=${source}->${destination}`;
-}
-
-async function migrate(args) {
-  const dryRun = Boolean(args["dry-run"]);
-  const force = Boolean(args.force);
-  const keepRootStub = Boolean(args["keep-root-stub"]);
-  const actions = [];
-  actions.push(await moveFile(LEGACY_PLAN_PATH, DEFAULT_PLAN_PATH, { dryRun, force }));
-  actions.push(await moveFile(LEGACY_STATE_PATH, DEFAULT_STATE_PATH, { dryRun, force }));
-  actions.push(await moveFile("schemas/devplan-state.schema.json", "devplan/schemas/devplan-state.schema.json", { dryRun, force }));
-  if (!dryRun) {
-    await writeConfig(DEFAULT_CONFIG_PATH);
-    await mkdir("devplan/reports", { recursive: true });
-    await writeFile("devplan/reports/.gitkeep", "");
-    if (keepRootStub) {
-      await writeFile(LEGACY_PLAN_PATH, "# DEVPLAN moved\n\nSee `devplan/DEVPLAN.md`.\n");
-      await writeFile(LEGACY_STATE_PATH, `${JSON.stringify({ moved_to: DEFAULT_STATE_PATH }, null, 2)}\n`);
-    }
-  }
-  actions.push(...await updatePackageScripts(process.cwd(), { dryRun }));
-  if (await updateGitignore(process.cwd(), { dryRun })) actions.push("gitignore=updated");
-  for (const action of actions) console.log(`${dryRun ? "dry_run:" : ""}${action}`);
-}
-
 async function init(args) {
   if (!args.name) throw new Error("init requires --name");
   const { statePath, planPath } = paths(args);
@@ -609,15 +499,17 @@ async function init(args) {
     milestones: [{ id: "launch", title: "Launch readiness", status: "planned", items: ["launch.plan"] }],
     items: [{ id: "launch.plan", title: "Define launch plan", status: "planned", priority: "release-critical-now", owner: "unassigned", evidence: [], success_conditions: ["Launch plan is documented and reviewed."], notes: [], updated_at: now() }]
   };
-  await mkdir(path.dirname(statePath), { recursive: true });
-  await mkdir(path.dirname(planPath), { recursive: true });
   await writeFile(statePath, `${JSON.stringify(state, null, 2)}\n`);
   await writeFile(planPath, `# ${args.name} Development Plan\n\n_Last updated: ${new Date().toISOString().slice(0, 10)}_\n\n## Purpose\n\nTrack project milestones and implementation work.\n\n## Release-critical now\n\n### launch.plan\n\nDefine the launch plan.\n\n## Update rule\n\nUpdate DEVPLAN-STATE.json in the same PR as tracked work changes.\n`);
-  await writeConfig(paths(args).configPath);
-  await mkdir("devplan/reports", { recursive: true });
-  await writeFile("devplan/reports/.gitkeep", "");
   console.log(`initialized_state=${statePath}`);
   console.log(`initialized_plan=${planPath}`);
+}
+
+async function copyIfMissing(source, destination, force) {
+  if (existsSync(destination) && !force) return false;
+  await mkdir(path.dirname(destination), { recursive: true });
+  await copyFile(source, destination);
+  return true;
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -630,7 +522,6 @@ async function main(argv = process.argv.slice(2)) {
 
   try {
     if (command === "init") return await init(args);
-    if (command === "migrate") return await migrate(args);
     if (command === "validate") {
       const result = await validateStateFile(args);
       if (!result.ok) process.exitCode = 1;

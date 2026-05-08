@@ -18,37 +18,31 @@
     "remove-item",
     "link-item",
     "protect",
-    "init",
-    "migrate"
+    "init"
   ],
   "files": [
     "README.md",
     "LICENSE",
     "package.json",
-    "devplan/DEVPLAN.md",
-    "devplan/DEVPLAN-STATE.json",
-    "devplan/devplan.config.json",
+    "DEVPLAN.md",
+    "DEVPLAN-STATE.json",
     "manifest.json",
     "package-scripts.json",
-    "devplan/schemas/devplan-state.schema.json",
+    "schemas/devplan-state.schema.json",
     "scripts/devplan.mjs",
     "scripts/devplan-status.mjs",
     "scripts/devplan-validate.mjs",
     "scripts/devplan-update.mjs",
     "scripts/devplan-report.mjs",
     "install.mjs",
-    "devplan/docs/USAGE.md",
-    "devplan/docs/GOVERNANCE.md",
-    "devplan/docs/AGENT-INSTRUCTIONS.md",
-    "devplan/docs/CI.md",
-    "devplan/docs/MIGRATION.md",
+    "docs/DEVPLAN-USAGE.md",
+    "docs/DEVPLAN-GOVERNANCE.md",
+    "docs/DEVPLAN-AGENT-INSTRUCTIONS.md",
+    "docs/DEVPLAN-CI.md",
+    "docs/DEVPLAN-MIGRATION.md",
+    "docs/CONNECTOR-BLOCKED-SCRIPTS.md",
     "workflows/devplan-check.yml",
     "examples/example.DEVPLAN-STATE.json",
     "tests/devplan-cli.test.mjs"
-  ],
-  "default_paths": {
-    "state": "devplan/DEVPLAN-STATE.json",
-    "plan": "devplan/DEVPLAN.md",
-    "config": "devplan/devplan.config.json"
-  }
+  ]
 }

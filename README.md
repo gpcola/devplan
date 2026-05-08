@@ -1,29 +1,11 @@
 # DEVPLAN Tracker Pack
 
-A dependency-free DEVPLAN tracker for any software repository. Installed project tracker files live under `devplan/` by default so they do not clutter the repository root.
+A dependency-free DEVPLAN tracker for any software repository. It keeps a human-readable `DEVPLAN.md` and machine-readable `DEVPLAN-STATE.json` aligned so humans, CI, and AI agents can see what is planned, blocked, done, and release-critical.
 
 ## Requirements
 
 - Node.js 20 or newer; Node.js 22 LTS is recommended.
 - No runtime dependencies and no external services.
-
-## Default installed structure
-
-```text
-devplan/
-  DEVPLAN.md
-  DEVPLAN-STATE.json
-  devplan.config.json
-  schemas/devplan-state.schema.json
-  docs/USAGE.md
-  docs/GOVERNANCE.md
-  docs/AGENT-INSTRUCTIONS.md
-  docs/CI.md
-  docs/MIGRATION.md
-  reports/.gitkeep
-```
-
-The CLI defaults to `--state devplan/DEVPLAN-STATE.json`, `--plan devplan/DEVPLAN.md`, and `--config devplan/devplan.config.json`.
 
 ## Quick start
 
@@ -31,7 +13,7 @@ The CLI defaults to `--state devplan/DEVPLAN-STATE.json`, `--plan devplan/DEVPLA
 node scripts/devplan.mjs validate
 node scripts/devplan.mjs status
 node scripts/devplan.mjs next
-node scripts/devplan.mjs report --output devplan/reports/DEVPLAN-REPORT.md
+node scripts/devplan.mjs report --output /tmp/devplan-report.md
 node scripts/devplan.mjs readiness
 ```
 
@@ -41,35 +23,23 @@ node scripts/devplan.mjs readiness
 node install.mjs --target /path/to/repo
 ```
 
-The installer creates `devplan/`, copies templates, creates `devplan/reports/.gitkeep`, merges `package.json` scripts, and updates `.gitignore` with generated/local files only. It preserves existing `devplan` files unless `--force` is provided.
-
-Options:
-
-- `--root-files` installs legacy root-level `DEVPLAN.md` and `DEVPLAN-STATE.json` files.
-- `--local-only` adds ignore rules for all installed tracker files.
-- `--force` overwrites existing tracker files and scripts.
-
-## Migration
-
-Legacy root files are still detected. If root `DEVPLAN.md` and `DEVPLAN-STATE.json` exist and `devplan/` does not, commands warn:
-
-```text
-Using legacy root DEVPLAN files. Run devplan-tracker migrate to move them to /devplan.
-```
-
-Move legacy files with:
-
-```bash
-node scripts/devplan.mjs migrate
-```
+The installer skips existing files unless `--force` is provided. If the target has a `package.json`, scripts from `package-scripts.json` are merged without removing existing scripts. If no `package.json` exists, the installer prints manual script instructions.
 
 ## Commands
 
 - `status` prints project, branch, status counts, and milestones.
-- `validate` checks JSON parsing, schema version, metadata, statuses, unique IDs, milestone references, required item fields, and `devplan/DEVPLAN.md` references.
+- `validate` checks JSON parsing, schema version, metadata, statuses, unique IDs, milestone references, required item fields, and `DEVPLAN.md` references.
 - `next` lists the highest-priority open work.
 - `report` emits a Markdown report.
 - `readiness` exits successfully only when no release-critical items are blocked or open.
-- `migrate` moves legacy root tracker files into `devplan/`.
+- `list` filters tracked items.
+- `add-milestone`, `add-item`, `update`, `remove-item`, `link-item`, and `protect` mutate state safely.
+- `init` creates a new state and plan, refusing to overwrite unless `--force` is passed.
 
-See `devplan/docs/USAGE.md`, `devplan/docs/GOVERNANCE.md`, `devplan/docs/AGENT-INSTRUCTIONS.md`, `devplan/docs/CI.md`, and `devplan/docs/MIGRATION.md`.
+## Agent rule
+
+Any PR that changes tracked work must update `DEVPLAN-STATE.json` in the same PR. Completed work needs evidence and success conditions must remain testable.
+
+## More documentation
+
+See `docs/DEVPLAN-USAGE.md`, `docs/DEVPLAN-GOVERNANCE.md`, `docs/DEVPLAN-AGENT-INSTRUCTIONS.md`, `docs/DEVPLAN-CI.md`, and `docs/DEVPLAN-MIGRATION.md`.
